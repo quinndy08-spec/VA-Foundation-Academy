@@ -60,6 +60,7 @@ h2{font-size:clamp(2rem,4vw,3.2rem);letter-spacing:-.025em}
 h3{font-size:1.35rem}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800;color:var(--gold-soft);margin-bottom:18px}
 .eyebrow::before{content:"";width:30px;height:1px;background:linear-gradient(90deg,var(--burgundy),var(--forest),var(--gold));box-shadow:0 0 10px rgba(224,189,114,.18)}
+.certificate .eyebrow::before,.navy .eyebrow::before{display:none}
 .kicker{color:var(--gold-soft);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-weight:800}
 .muted{color:var(--muted)}
 .gold-rule{width:72px;height:1px;background:linear-gradient(90deg,var(--burgundy),var(--gold),var(--forest));margin:22px 0}
@@ -134,6 +135,7 @@ h3{font-size:1.35rem}
 .section-head.center{margin-left:auto;margin-right:auto;text-align:center}
 .section-head.center .eyebrow{justify-content:center}
 .section-head.center .eyebrow::before{display:none}
+.certificate .eyebrow::before,.navy .eyebrow::before{display:none}
 .section-head p{color:var(--muted);font-size:1rem}
 .navy .section-head p{color:rgba(255,255,255,.68)}
 .glass{background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(16px) saturate(140%);box-shadow:inset 0 1px rgba(255,255,255,.28),0 18px 52px rgba(4,17,32,.10)}
@@ -1188,6 +1190,42 @@ function stripHtml(value = '') {
     .trim();
 }
 
+function buildModuleSummary(content = '', moduleTitle = '') {
+  const cleaned = stripHtml(content || '').replace(/\s+/g, ' ').trim();
+  const titleText = moduleTitle || 'this module';
+
+  if (!cleaned) {
+    return `This module introduces ${titleText.toLowerCase()} and the practical skills learners apply in a real virtual assistant workflow.`;
+  }
+
+  const sentences = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map(sentence => sentence.trim())
+    .filter(Boolean);
+
+  if (sentences.length >= 2) {
+    const twoSentenceSummary = `${sentences[0]} ${sentences[1]}`.trim();
+    if (twoSentenceSummary.length <= 220) return twoSentenceSummary;
+  }
+
+  const firstSentence = sentences[0] || cleaned;
+  if (firstSentence.toLowerCase() === titleText.toLowerCase()) {
+    return `This module introduces ${titleText.toLowerCase()} and the practical skills learners apply in a real virtual assistant workflow.`;
+  }
+
+  if (firstSentence.length <= 180) return firstSentence;
+
+  const words = firstSentence.split(/\s+/);
+  let summary = '';
+  for (const word of words) {
+    const nextSummary = summary ? `${summary} ${word}` : word;
+    if (nextSummary.length > 180) break;
+    summary = nextSummary;
+  }
+
+  return summary || firstSentence;
+}
+
 async function loadCourseModules() {
   const moduleHost = document.getElementById('modules');
 
@@ -1235,9 +1273,9 @@ async function loadCourseModules() {
     const learnTitles = moduleLessons.slice(0, 5).map(lesson => lesson.title).filter(Boolean);
     const descriptionSource = moduleLessons.find(lesson => stripHtml(lesson.content).length > 0);
     const baseDescription = descriptionSource
-      ? stripHtml(descriptionSource.content)
+      ? buildModuleSummary(descriptionSource.content, m.title)
       : `This module introduces ${m.title.toLowerCase()} and the skills learners apply in a real virtual assistant workflow.`;
-    const description = baseDescription.length > 220 ? `${baseDescription.slice(0, 220).trim()}…` : baseDescription;
+    const description = baseDescription;
     const exampleText = moduleLessons.length
       ? `Example focus: ${moduleLessons[0].title}. Learners apply the workflow in a realistic VA scenario before moving to the next step.`
       : `Example focus: ${m.title} in a practical virtual assistant workflow.`;
