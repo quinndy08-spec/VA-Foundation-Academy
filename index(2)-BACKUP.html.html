@@ -10,13 +10,12 @@
 <style>
 :root {
   --navy:#132a4d; --navy-deep:#091a31; --navy-2:#1b3a64;
-  --gold:#c99a3e; --gold-soft:#e0bd72; --ivory:#f8f5ee; --white:#fff; --cream:#f7f1e5;
-  --ink:#1b2a3c; --muted:#657286; --line:rgba(201,154,62,.28); --border-gold:rgba(201,154,62,.52);
+  --gold:#c99a3e; --gold-soft:#e0bd72; --ivory:#f8f5ee; --white:#fff;
+  --ink:#1b2a3c; --muted:#657286; --line:rgba(201,154,62,.28);
   --glass:rgba(255,255,255,.075); --glass-strong:rgba(255,255,255,.12);
   --shadow:0 22px 70px rgba(8,23,43,.16);
   --serif:Georgia,"Times New Roman",serif;
   --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
   --radius:22px;
   scroll-behavior:smooth;
 }
@@ -127,40 +126,21 @@ h3{font-size:1.35rem}
 
 /* curriculum */
 .curriculum{background:#fff}
-.module{border:1px solid var(--border-gold);border-radius:14px;background:var(--cream);overflow:hidden;margin-bottom:14px;transition:.28s ease;box-shadow:0 12px 28px rgba(19,42,77,.04)}
-.module.open{border-color:rgba(201,154,62,.72);box-shadow:0 18px 42px rgba(19,42,77,.08)}
-.module-toggle{width:100%;border:0;background:transparent;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:18px;text-align:left;color:var(--navy)}
-.module-header{display:flex;align-items:center;gap:18px;min-width:0;flex:1}
-.module-number{color:var(--gold);font-size:.66rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;font-family:var(--mono);white-space:nowrap}
-.module-name{font-family:var(--serif);font-size:1.2rem;font-weight:700;color:var(--navy);line-height:1.2}
-.chevron{color:var(--gold);transition:.25s ease;font-size:1.2rem;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0}
+.module{border:1px solid rgba(19,42,77,.13);border-radius:18px;background:#faf8f2;overflow:hidden;margin-bottom:12px;transition:.25s}
+.module.open{border-color:rgba(201,154,62,.55);box-shadow:0 18px 48px rgba(19,42,77,.08)}
+.module button{width:100%;border:0;background:transparent;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;text-align:left;color:var(--navy)}
+.module-title{display:flex;gap:18px;align-items:center}
+.module-number{color:var(--gold);font-size:.72rem;font-weight:900;letter-spacing:.15em;min-width:74px}
+.module-name{font-family:var(--serif);font-size:1.22rem;font-weight:700}
+.chevron{color:var(--gold);transition:.25s;font-size:1.2rem}
 .module.open .chevron{transform:rotate(180deg)}
 .module-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
 .module.open .module-body{grid-template-rows:1fr}
 .module-inner{overflow:hidden;padding:0 24px}
-.module.open .module-inner{padding-bottom:24px}
-.module-divider{border-top:1px solid rgba(201,154,62,.34);margin-top:0}
-.module-content{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;padding-top:20px}
-.module-detail{display:grid;gap:18px}
-.module-detail-block{display:grid;gap:9px}
-.detail-label{display:inline-block;color:var(--gold);font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-family:var(--mono)}
-.module-detail p,.module-side-card p{margin:0;color:var(--navy);font-size:.96rem}
-.module-points{list-style:none;padding:0;margin:0;display:grid;gap:8px}
-.module-points li{padding-left:15px;position:relative;color:var(--navy);font-size:.9rem;line-height:1.5}
-.module-points li::before{content:"•";position:absolute;left:0;color:var(--gold);font-weight:700}
-.module-side-card{background:rgba(255,255,255,.28);border:1px solid rgba(201,154,62,.22);border-radius:12px;padding:18px;display:grid;gap:18px}
+.module.open .module-inner{padding-bottom:25px}
+.module-content{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;padding-top:2px;border-top:1px solid rgba(19,42,77,.08)}
 .topic-list{columns:2;padding-left:18px;color:var(--muted)}
 .topic-list li{margin:5px 0}
-@media (max-width:760px){
-  .module-toggle{padding:18px 18px}
-  .module-header{display:block}
-  .module-number{display:block;margin-bottom:6px}
-  .module-name{font-size:1.08rem}
-  .module-content{grid-template-columns:1fr}
-  .module-side-card{padding:16px}
-  .detail-label{letter-spacing:.12em}
-  .module-detail p,.module-side-card p{font-size:.92rem}
-}
 
 /* AI */
 .ai-section{background:linear-gradient(180deg,var(--navy),#0d2440)}
@@ -908,15 +888,6 @@ const academySupabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   }
 })();
 
-function stripHtml(value = '') {
-  return String(value || '')
-    .replace(/<br\s*\/?\s*>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 async function loadCourseModules() {
   const moduleHost = document.getElementById('modules');
 
@@ -925,7 +896,7 @@ async function loadCourseModules() {
     return;
   }
 
-  const { data: modules, error: modulesError } = await academySupabase
+const { data: modules, error: modulesError } = await academySupabase
     .from('modules')
     .select('id, title, position')
     .order('position', { ascending: true });
@@ -940,7 +911,7 @@ async function loadCourseModules() {
     return;
   }
 
-  const { data: lessons, error: lessonsError } = await academySupabase
+const { data: lessons, error: lessonsError } = await academySupabase
     .from('lessons')
     .select('id, module_id, position, title, slug, is_preview, content')
     .order('position', { ascending: true });
@@ -960,75 +931,70 @@ async function loadCourseModules() {
       .filter(lesson => lesson.module_id === m.id)
       .sort((a, b) => a.position - b.position);
 
-    const moduleNumber = String(m.position).padStart(2, '0');
-    const learnTitles = moduleLessons.slice(0, 5).map(lesson => lesson.title).filter(Boolean);
-    const descriptionSource = moduleLessons.find(lesson => stripHtml(lesson.content).length > 0);
-    const baseDescription = descriptionSource
-      ? stripHtml(descriptionSource.content)
-      : `This module introduces ${m.title.toLowerCase()} and the skills learners apply in a real virtual assistant workflow.`;
-    const description = baseDescription.length > 220 ? `${baseDescription.slice(0, 220).trim()}…` : baseDescription;
-    const exampleText = moduleLessons.length
-      ? `Example focus: ${moduleLessons[0].title}. Learners apply the workflow in a realistic VA scenario before moving to the next step.`
-      : `Example focus: ${m.title} in a practical virtual assistant workflow.`;
-    const exerciseText = moduleLessons.length
-      ? `Complete the guided work for ${moduleLessons.slice(0, Math.min(3, moduleLessons.length)).map(lesson => lesson.title).join(', ')} and then replicate the same process on a fresh task.`
-      : 'Complete the guided practice for this module and repeat the workflow on a fresh task.';
-    const outcomeText = moduleLessons.length
-      ? `By the end of this module, learners can confidently handle ${moduleLessons.slice(0, Math.min(2, moduleLessons.length)).map(lesson => lesson.title.toLowerCase()).join(' and ')} in a professional VA workflow.`
-      : `By the end of this module, learners can confidently apply the core skills in a real VA workflow.`;
-
     return `
       <article class="module" id="module-${i}">
         <button
-          class="module-toggle"
           type="button"
           aria-expanded="false"
           aria-controls="module-body-${i}"
           onclick="toggleModule(${i})"
         >
-          <span class="module-header">
-            <span class="module-number">Module ${moduleNumber}</span>
-            <span class="module-name">${m.title}</span>
+          <span class="module-title">
+            <span class="module-number">${m.position}</span>
+            ${m.title}
           </span>
           <span class="chevron" aria-hidden="true">⌄</span>
         </button>
 
-        <div class="module-body" id="module-body-${i}">
+        <div
+          class="module-body"
+          id="module-body-${i}"
+        >
           <div class="module-inner">
-            <div class="module-divider"></div>
             <div class="module-content">
-              <div class="module-detail">
-                <div class="module-detail-block">
-                  <span class="detail-label">Description</span>
-                  <p>${description}</p>
+
+              <div>
+                <p class="muted">
+                  ${moduleLessons.length} lesson${moduleLessons.length === 1 ? '' : 's'}
+                </p>
+
+                <div class="gold-rule"></div>
+
+                <div class="lesson-list">
+                  ${
+                    moduleLessons.length
+                      ? moduleLessons.map(lesson => `
+                        <div
+                          class="lesson-item"
+                          data-lesson-id="${lesson.id}"
+                          data-slug="${lesson.slug || ''}"
+                        >
+                          <div class="lesson-number">
+                            ${lesson.position}
+                          </div>
+
+                          <div class="lesson-info">
+                            <div class="lesson-title">
+                              ${lesson.title}
+                              ${
+                                lesson.is_preview
+                                  ? '<span class="preview-badge">Preview</span>'
+                                  : ''
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      `).join('')
+                      : `
+                        <p class="muted">
+                          No lessons are available in this module yet.
+                        </p>
+                      `
+                  }
                 </div>
 
-                <div class="module-detail-block">
-                  <span class="detail-label">WHAT YOU'LL LEARN</span>
-                  <ul class="module-points">
-                    ${learnTitles.length
-                      ? learnTitles.map(title => `<li>${title}</li>`).join('')
-                      : '<li>Core skills and workflow practice</li>'}
-                  </ul>
-                </div>
               </div>
 
-              <div class="module-side-card">
-                <div class="module-detail-block">
-                  <span class="detail-label">EXAMPLE</span>
-                  <p>${exampleText}</p>
-                </div>
-
-                <div class="module-detail-block">
-                  <span class="detail-label">PRACTICAL EXERCISE</span>
-                  <p>${exerciseText}</p>
-                </div>
-
-                <div class="module-detail-block">
-                  <span class="detail-label">EXPECTED OUTCOME</span>
-                  <p>${outcomeText}</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
